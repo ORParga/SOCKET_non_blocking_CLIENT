@@ -1,0 +1,4 @@
+﻿  15 - WSA non-blocking Client.cpp
+E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\15 - WSA non-blocking Client.cpp(71,38): warning C4553: "==": el resultado de la expresión no se usa. ¿Quiso decir "="?
+E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\15 - WSA non-blocking Client.h(87): warning C4715: 'WSA_non_blocking_Client::Attemp_connect': no todas las rutas de acceso de control devuelven un valor
+  15 - WSA non-blocking Client.vcxproj -> E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\Debug\15 - WSA non-blocking Client.exe
