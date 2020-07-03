@@ -8,10 +8,13 @@
 #ifndef IDT_TIMER1
 #define IDT_TIMER1 1
 #endif // !IDT_TIMER1
+#ifndef IDT_TIMER1_MILIS
+#define IDT_TIMER1_MILIS 500
+#endif
 #include "15 - WSA non-blocking Client.h"
 
 #define MAX_LOADSTRING 100
-
+#define IDC_MAINFRM_BTN_1               40501
 // Variables globales:
 HINSTANCE hInst;                                // instancia actual
 WCHAR szTitle[MAX_LOADSTRING];                  // Texto de la barra de título
@@ -23,7 +26,7 @@ RECT StaticRect2 = { 100,90,100,20 };
 RECT StaticRect3 = { 10,120,80,20 };
 RECT EditRect = { 100,120,0,0 };
 RECT ButtonRect = { 100,150,100,20 };
-
+int ID_SendButton = IDC_MAINFRM_BTN_1;
 //WSA_NON_BLOKING inicializacion y declaracion
 WSA_non_blocking_Client WSAnb_Client;
 
@@ -82,7 +85,7 @@ int Ini_WSA_non_blocking_client(HWND hwnd) {
     if(WSAnb_Client.CreateClientSocket() == FALSE)return FALSE;
     SetTimer(hwnd,             // handle to main window 
         IDT_TIMER1,            // timer identifier 
-        2000,                 // 1-second interval 
+        IDT_TIMER1_MILIS,     // interval 
         (TIMERPROC)NULL);     // no timer callback 
 
     if (!WSAnb_Client.bConnected)
@@ -142,9 +145,9 @@ int Ini_UI(HWND hwnd) {
         ButtonRect.right,        // Button width
         ButtonRect.bottom,        // Button height
         hwnd,     // Parent window
-        NULL,       // No menu.
+        (HMENU)IDC_MAINFRM_BTN_1,       // For buttons, hMenu is used to send the WM_BUTTON identifier
         hInst,
-        NULL);      // Pointer not needed.
+        NULL);      // Pointer to identify the button in WndProc()
 
     hwndEdit = CreateWindowEx(
         0, L"EDIT",   // predefined class 
@@ -239,12 +242,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 WSAnb_Client.Attemp_connect(IPString, portNumber);
                 break;
             case WSA_non_blocking_Client::STATE::CONNECTED:
-                SetWindowText(hwndMesageRec, WSAnb_Client.IPString);
+                SetWindowTextA(hwndMesageRec, (LPCSTR)WSAnb_Client.BufferRecieved);
                 break;
             default:
                 break;
             }
-             WSAnb_Client.testForEvents();
+             WSAnb_Client.testForEvents(); 
+
             InvalidateRect(hWnd, NULL, TRUE);
             return 0;
         default:
@@ -263,7 +267,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
         if (lParam== (LPARAM)hwndButton)
         {
-            break;
+            const int textSize = 1000;
+            char text[textSize];
+            if(GetWindowTextA(hwndEdit, text, textSize)!=0)
+                WSAnb_Client.SendText(text,strlen(text));
+            return 0;
         }
             int wmId = LOWORD(wParam);
             // Analizar las selecciones de menú:
@@ -271,10 +279,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             {
             case IDM_ABOUT:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-                break;
+                return 0;
             case IDM_EXIT:
                 DestroyWindow(hWnd);
-                break;
+                return 0;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }
@@ -372,11 +380,22 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     return (INT_PTR)FALSE;
 }
 
+/// <summary>
+/// printf() style debugging
+/// https://stackoverflow.com/questions/15240/
+/// </summary>
+/// <param name="lpszFormat">Debugging text</param>
 void XTrace0(LPCTSTR lpszText)
 {
     ::OutputDebugString(lpszText);
 }
 
+/// <summary>
+/// printf() style debugging
+/// https://stackoverflow.com/questions/15240/
+/// </summary>
+/// <param name="lpszFormat">-Debugging text</param>
+/// <param name="">.... parameters in _vstprintf_s() style</param>
 void XTrace(LPCTSTR lpszFormat, ...)
 {
     va_list args;

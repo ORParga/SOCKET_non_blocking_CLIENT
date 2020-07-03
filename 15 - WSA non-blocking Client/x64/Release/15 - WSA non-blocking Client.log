@@ -1,6 +1,5 @@
-﻿  15 - WSA non-blocking Client.cpp
-  Generando código
-  Previous IPDB not found, fall back to full compilation.
-  All 21 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
-  Generación de código finalizada
-  15 - WSA non-blocking Client.vcxproj -> E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\x64\Release\15 - WSA non-blocking Client.exe
+﻿E:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\Microsoft.Common.CurrentVersion.targets(5148,5): warning MSB3061: No se puede eliminar el archivo "E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\x64\Release\15 - WSA non-blocking Client.exe". Acceso denegado a la ruta de acceso 'E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\x64\Release\15 - WSA non-blocking Client.exe'.
+E:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppClean.targets(76,5): warning : Acceso denegado a la ruta de acceso 'e:\programacion\c++\comunications\15 - wsa non-blocking client\15 - wsa non-blocking client\x64\release\15 - wsa non-blocking client.exe'.
+  15 - WSA non-blocking Client.cpp
+E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\15 - WSA non-blocking Client.cpp(273,56): warning C4267: 'argumento': conversión de 'size_t' a 'int'; posible pérdida de datos
+LINK : fatal error LNK1104: no se puede abrir el archivo 'E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\x64\Release\15 - WSA non-blocking Client.exe'

@@ -1,2 +1,4 @@
 ﻿  15 - WSA non-blocking Client.cpp
+E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\15 - WSA non-blocking Client.cpp(273,56): warning C4267: 'argumento': conversión de 'size_t' a 'int'; posible pérdida de datos
+E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\15 - WSA non-blocking Client.h(325): warning C4715: 'WSA_non_blocking_Client::SendText': no todas las rutas de acceso de control devuelven un valor
   15 - WSA non-blocking Client.vcxproj -> E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\x64\Debug\15 - WSA non-blocking Client.exe

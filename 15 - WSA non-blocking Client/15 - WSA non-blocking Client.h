@@ -6,8 +6,8 @@
 
 #pragma comment (lib,"Ws2_32.lib")
 
-#define TIME_OUT_FOR_EVENTS 500
-
+#define TIME_OUT_FOR_EVENTS 50 //50 miliseconds
+#define DATA_BUFSIZE 512
 class WSA_non_blocking_Client {
     //*************** STATUS **********************************************************
 public: enum class STATE { NONE, CONNECTED, LISTENING, REQUESTING };
@@ -24,7 +24,12 @@ public:      wchar_t PortString[IPString_Lenght] = { 0 };
       //****************** EVENTS *****************************************************
 protected: DWORD EventTotal = 1;
 protected: WSAEVENT EventArray[WSA_MAXIMUM_WAIT_EVENTS];
-         //***************************** VARIOS *****************************************
+//************************** SEND RECIEVE ********************************************
+
+public: CHAR BufferRecieved[DATA_BUFSIZE + 1] = { 0 };
+public:int ReceivedBytes = { 0 };
+public: BOOL OverflowAlert = { FALSE };
+//***************************** VARIOS *****************************************
 public:int TimeOutForEvents = TIME_OUT_FOR_EVENTS;
 public:int lastWSAError = 0;
 protected: int iResult = 0;
@@ -248,6 +253,7 @@ public:int testForEvents() {
         }
         else {
             XTrace(L"FD_READ\n");
+            FD_READ_response();
             return 0;
         }
     }
@@ -261,6 +267,27 @@ public:int testForEvents() {
             return 0;
         }
     }
+    return 0;
+}
+
+protected:int FD_READ_response() {
+    ReceivedBytes = recv(ClientSocket, BufferRecieved, DATA_BUFSIZE, 0);
+    if (ReceivedBytes == SOCKET_ERROR) {
+
+        lastWSAError = WSAGetLastError();
+        XTrace(L"recv() failed with error %u: %s\n", lastWSAError, WindowsErrorToString(lastWSAError));
+        return SOCKET_ERROR;
+    }
+    if (ReceivedBytes >= DATA_BUFSIZE)
+    {
+        OverflowAlert= TRUE;
+    }
+    else {
+        
+        OverflowAlert = FALSE;
+    }
+    //El tamaño del buffer es DATA_BUFSIZE+1 para poder colocar un cero al final
+    BufferRecieved[ReceivedBytes] = 0;
     return 0;
 }
 /// <summary>
@@ -282,5 +309,18 @@ public: wchar_t* WindowsErrorToString(int ErrorCode)
         XTrace(L"Error with FormatMessage\n");
     }
     return lpBufferWindowsError;
+}
+
+public: BOOL SendText(char* text,int len) {
+    int bytesSend = 0;
+    if (bConnected) {
+        bytesSend=send(ClientSocket, text, len, 0);
+        if (bytesSend == SOCKET_ERROR) {
+            lastWSAError = WSAGetLastError();
+            XTrace(L"Error al enviar texto. Codigo: %u = %s", lastWSAError, WindowsErrorToString(lastWSAError));
+            return FALSE;
+        }
+        //XTrace(L"Texto enviado:\"%s\". %u",text,bytesSend);
+    }
 }
 };
