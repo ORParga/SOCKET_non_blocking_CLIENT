@@ -16,10 +16,11 @@
 #define MAX_LOADSTRING 100
 #define IDC_MAINFRM_BTN_1               40501
 // Variables globales:
-HINSTANCE hInst;                                // instancia actual
-WCHAR szTitle[MAX_LOADSTRING];                  // Texto de la barra de título
-WCHAR szWindowClass[MAX_LOADSTRING];            // nombre de clase de la ventana principal
-//Manejadores de controles comunes
+HINSTANCE hInst;                                // Current Instance
+WCHAR szTitle[MAX_LOADSTRING];                  // App Tittle
+WCHAR szWindowClass[MAX_LOADSTRING];            // Window name
+
+//*********************COMMON CONTROLS ***************************************************
 HWND hwndButton, hwndEdit, hwndStatic, hwndStatic2, hwndMesageRec;
 RECT StaticRect1 = { 10,90,80,20 };
 RECT StaticRect2 = { 100,90,100,20 };
@@ -27,28 +28,33 @@ RECT StaticRect3 = { 10,120,80,20 };
 RECT EditRect = { 100,120,0,0 };
 RECT ButtonRect = { 100,150,100,20 };
 int ID_SendButton = IDC_MAINFRM_BTN_1;
-//WSA_NON_BLOKING inicializacion y declaracion
+
+//********************WSA_NON_BLOKING initialization **************************************
 WSA_non_blocking_Client WSAnb_Client;
 
 wchar_t IPString[] = L"127.0.0.1";
 int portNumber = 27015;
-// Declaraciones de funciones
-ATOM                MyRegisterClass(HINSTANCE hInstance);
-HWND                InitInstance(HINSTANCE, int);
+// ******************* FUNCTION DECLARATIONS **********************************************
+ATOM                MyRegisterClass();
+HWND                InitInstance( int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 int Ini_WSA_non_blocking_client(HWND);
 void XTrace(LPCTSTR , ...);
 void XTrace0(LPCTSTR );
-void ShowIPandPORT(HDC , RECT* );
-int Ini_UI(HWND);
+void UpdateUI(HDC , RECT* );
+void Ini_UI(HWND);
 void ShowMessageControls(BOOL );
 
+/// <summary>
+/// App's Entry point
+/// </summary>
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
                      _In_ int       nCmdShow)
 {
+    hInst = hInstance;
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -57,10 +63,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // Inicializar cadenas globales
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_MY15WSANONBLOCKINGCLIENT, szWindowClass, MAX_LOADSTRING);
-    MyRegisterClass(hInstance);
+    MyRegisterClass();
 
     // Realizar la inicialización de la aplicación:
-    HWND hwnd = InitInstance (hInstance, nCmdShow);
+    HWND hwnd = InitInstance ( nCmdShow);
     if (!hwnd) return FALSE;
 
     if (!Ini_WSA_non_blocking_client(hwnd))return FALSE;
@@ -81,22 +87,30 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     return (int) msg.wParam;
 }
 
+/// <summary>
+/// Initialize Client Socket
+/// Initialize TIMER
+/// </summary>
+/// <param name="hwnd">Main Window Handle</param>
+/// <returns>TRUE if succeeds, FalSe if failure. If the failure occurred while
+/// initializing the socket, the variable WSAnb_Client..lastWSAError saves the 
+/// value returned by WSAGetLastError() </returns>
 int Ini_WSA_non_blocking_client(HWND hwnd) {
-    if(WSAnb_Client.CreateClientSocket() == FALSE)return FALSE;
-    SetTimer(hwnd,             // handle to main window 
-        IDT_TIMER1,            // timer identifier 
-        IDT_TIMER1_MILIS,     // interval 
-        (TIMERPROC)NULL);     // no timer callback 
 
-    if (!WSAnb_Client.bConnected)
-    {
-
-        //wchar_t IPString[] = L"192.168.137.1";
-        WSAnb_Client.Attemp_connect(IPString, portNumber);
-    }
+    if (WSAnb_Client.CreateClientSocket() == FALSE)return FALSE;
+    
+    if (SetTimer(hwnd,              // handle to main window 
+        IDT_TIMER1,             // timer identifier 
+        IDT_TIMER1_MILIS,       // interval 
+        (TIMERPROC)NULL)       // no timer callback 
+        == 0)return FALSE;
     return TRUE;
 }
-int Ini_UI(HWND hwnd) {
+/// <summary>
+/// Initialize the User Interface
+/// </summary>
+/// <param name="hwnd">main Window Handle</param>
+void Ini_UI(HWND hwnd) {
     hwndStatic = CreateWindowEx(
         0, L"STATIC",   // predefined class 
         L"Recieve:",         // no window title 
@@ -159,14 +173,13 @@ int Ini_UI(HWND hwnd) {
         hInst,
         NULL);        // pointer not needed 
 
-    return TRUE;
 }
-//
-//  FUNCIÓN: MyRegisterClass()
-//
-//  PROPÓSITO: Registra la clase de ventana.
-//
-ATOM MyRegisterClass(HINSTANCE hInstance)
+
+/// <summary>
+/// Regiter the main window's class
+/// </summary>
+/// <returns>Returns a class atom that uniquely identifies the class. Zero if fails</returns>
+ATOM MyRegisterClass()
 {
     WNDCLASSEXW wcex;
 
@@ -176,8 +189,8 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.lpfnWndProc    = WndProc;
     wcex.cbClsExtra     = 0;
     wcex.cbWndExtra     = 0;
-    wcex.hInstance      = hInstance;
-    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_MY15WSANONBLOCKINGCLIENT));
+    wcex.hInstance      = hInst;
+    wcex.hIcon          = LoadIcon(hInst, MAKEINTRESOURCE(IDI_MY15WSANONBLOCKINGCLIENT));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
     wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_MY15WSANONBLOCKINGCLIENT);
@@ -187,22 +200,16 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     return RegisterClassExW(&wcex);
 }
 
-//
-//   FUNCIÓN: InitInstance(HINSTANCE, int)
-//
-//   PROPÓSITO: Guarda el identificador de instancia y crea la ventana principal
-//
-//   COMENTARIOS:
-//
-//        En esta función, se guarda el identificador de instancia en una variable común y
-//        se crea y muestra la ventana principal del programa.
-//
-HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
+/// <summary>
+/// Create and shows the main window.
+/// </summary>
+/// <param name="nCmdShow">ShowWindow() parameter</param>
+/// <returns>Main window handle</returns>
+HWND InitInstance( int nCmdShow)
 {
-   hInst = hInstance; // Almacenar identificador de instancia en una variable global
 
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, 300, 300, nullptr, nullptr, hInstance, nullptr);
+      CW_USEDEFAULT, 0, 300, 300, nullptr, nullptr, hInst, nullptr);
 
    if (!hWnd)
    {
@@ -215,16 +222,9 @@ HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
    return hWnd;
 }
 
-//
-//  FUNCIÓN: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  PROPÓSITO: Procesa mensajes de la ventana principal.
-//
-//  WM_COMMAND  - procesar el menú de aplicaciones
-//  WM_PAINT    - Pintar la ventana principal
-//  WM_DESTROY  - publicar un mensaje de salida y volver
-//
-//
+/// <summary>
+/// Main window procedure
+/// </summary>
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
@@ -305,12 +305,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
             case WSA_non_blocking_Client::STATE::CONNECTED:
                 DrawText(hdc, L"Estado:Conectado", -1, &TextRect, DT_VCENTER | DT_LEFT);
-                ShowIPandPORT(hdc, &TextRect);
+                UpdateUI(hdc, &TextRect);
                 ShowMessageControls(TRUE);
                 break;
             case WSA_non_blocking_Client::STATE::REQUESTING:
                 DrawText(hdc, L"Estado:Solicitando conexion", -1, &TextRect, DT_VCENTER | DT_LEFT);
-                ShowIPandPORT(hdc, &TextRect);
+                UpdateUI(hdc, &TextRect);
                 ShowMessageControls(FALSE);
                 break;
             default:
@@ -345,14 +345,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
     return 0;
 }
-void ShowIPandPORT(HDC hdc, RECT* TextRect) {
+
+/// <summary>
+/// Show the Client's basic parametres ( Status, Ip and Port ) 
+/// </summary>
+/// <param name="hdc">Device context handler received by BeginPaint () on WM_PAINT</param>
+/// <param name="message">Texto para ser mostrado en primer lugar</param>
+void UpdateUI(HDC hdc, RECT* TextRect) {
     TextRect->top += 20;
     TextRect->bottom += 20;
     DrawText(hdc, WSAnb_Client.IPString, -1, TextRect, DT_VCENTER | DT_LEFT);
     TextRect->top += 20;
     TextRect->bottom += 20;
     DrawText(hdc, WSAnb_Client.PortString, -1, TextRect, DT_VCENTER | DT_LEFT);
+
 }
+
+/// <summary>
+/// Shows or hides the send/recv User Interface
+/// </summary>
+/// <param name="show">TRUE= show, FALSE = hide</param>
 void ShowMessageControls(BOOL show) {
     ShowWindow(hwndStatic, show? SW_SHOW:SW_HIDE);
     ShowWindow(hwndStatic2, show ? SW_SHOW : SW_HIDE);

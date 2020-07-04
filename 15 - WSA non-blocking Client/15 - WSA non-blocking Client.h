@@ -270,6 +270,11 @@ public:int testForEvents() {
     return 0;
 }
 
+/// <summary>
+/// FD_READ event response.
+/// Read the incoming data and put a zero at the end
+/// activates or deactivates the OverflowAlert if the incoming data is bigger or smaller than buffer
+/// </summary>
 protected:int FD_READ_response() {
     ReceivedBytes = recv(ClientSocket, BufferRecieved, DATA_BUFSIZE, 0);
     if (ReceivedBytes == SOCKET_ERROR) {
@@ -311,16 +316,23 @@ public: wchar_t* WindowsErrorToString(int ErrorCode)
     return lpBufferWindowsError;
 }
 
-public: BOOL SendText(char* text,int len) {
+/// <summary>
+/// Send a byte array to the connected Server 
+/// </summary>
+/// <param name="text">Array to send</param>
+/// <param name="len">number of bytes to send</param>
+/// <returns>True if succeed. FALSE if fails, lastWSAError saves the WSAGelLastError() value</returns>
+public: BOOL SendText(char* text,size_t len) {
+    lastWSAError = 0;
     int bytesSend = 0;
     if (bConnected) {
-        bytesSend=send(ClientSocket, text, len, 0);
+        bytesSend=send(ClientSocket, text,(int) len, 0);
         if (bytesSend == SOCKET_ERROR) {
             lastWSAError = WSAGetLastError();
-            XTrace(L"Error al enviar texto. Codigo: %u = %s", lastWSAError, WindowsErrorToString(lastWSAError));
+            XTrace(L"Error sending Data. Code: %u = %s", lastWSAError, WindowsErrorToString(lastWSAError));
             return FALSE;
         }
-        //XTrace(L"Texto enviado:\"%s\". %u",text,bytesSend);
     }
+    return FALSE;
 }
 };
