@@ -1,5 +1,11 @@
-﻿E:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\Microsoft.Common.CurrentVersion.targets(5148,5): warning MSB3061: No se puede eliminar el archivo "E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\x64\Release\15 - WSA non-blocking Client.exe". Acceso denegado a la ruta de acceso 'E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\x64\Release\15 - WSA non-blocking Client.exe'.
-E:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppClean.targets(76,5): warning : Acceso denegado a la ruta de acceso 'e:\programacion\c++\comunications\15 - wsa non-blocking client\15 - wsa non-blocking client\x64\release\15 - wsa non-blocking client.exe'.
-  15 - WSA non-blocking Client.cpp
-E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\15 - WSA non-blocking Client.cpp(273,56): warning C4267: 'argumento': conversión de 'size_t' a 'int'; posible pérdida de datos
-LINK : fatal error LNK1104: no se puede abrir el archivo 'E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\x64\Release\15 - WSA non-blocking Client.exe'
+﻿  15 - WSA non-blocking Client.cpp
+E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\15 - WSA non-blocking Client.h(326,27): warning C4101: 'comodin2': variable local sin referencia
+E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\15 - WSA non-blocking Client.h(326,13): warning C4101: 'comodin': variable local sin referencia
+E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\15 - WSA non-blocking Client.cpp(354,31): warning C4244: 'inicializando': conversión de 'LRESULT' a 'int'; posible pérdida de datos
+E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\15 - WSA non-blocking Client.cpp(267,12): warning C4101: 'ListItem': variable local sin referencia
+  Generando código
+  Previous IPDB not found, fall back to full compilation.
+E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\15 - WSA non-blocking Client.h(407): warning C4715: 'WSA_non_blocking_Client::GetIPList': no todas las rutas de acceso de control devuelven un valor
+  All 33 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Generación de código finalizada
+  15 - WSA non-blocking Client.vcxproj -> E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\x64\Release\15 - WSA non-blocking Client.exe

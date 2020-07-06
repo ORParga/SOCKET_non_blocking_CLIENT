@@ -11,10 +11,11 @@
 #ifndef IDT_TIMER1_MILIS
 #define IDT_TIMER1_MILIS 500
 #endif
+#include "windowsx.h"
 #include "15 - WSA non-blocking Client.h"
 
 #define MAX_LOADSTRING 100
-#define IDC_MAINFRM_BTN_1               40501
+#define IDC_MAINFRM_BTN_1               40501   //SEND button ID
 // Variables globales:
 HINSTANCE hInst;                                // Current Instance
 WCHAR szTitle[MAX_LOADSTRING];                  // App Tittle
@@ -22,18 +23,21 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // Window name
 
 //*********************COMMON CONTROLS ***************************************************
 HWND hwndButton, hwndEdit, hwndStatic, hwndStatic2, hwndMesageRec;
-RECT StaticRect1 = { 10,90,80,20 };
-RECT StaticRect2 = { 100,90,100,20 };
-RECT StaticRect3 = { 10,120,80,20 };
-RECT EditRect = { 100,120,0,0 };
-RECT ButtonRect = { 100,150,100,20 };
+HWND hwndIP, hwndPort;
+RECT ComboIPRect1 = { 10,70,150,200 };
+RECT EditPortRect1 = { ComboIPRect1.left + ComboIPRect1.right + 10,70,100,20 };
+int topCoordMessages = 100;
+RECT StaticRect1 = { 10,topCoordMessages,80,20 };
+RECT StaticRect2 = { 100,topCoordMessages,100,20 };
+RECT StaticRect3 = { 10,topCoordMessages+30,80,20 };
+RECT EditRect = { 100,topCoordMessages+30,0,0 };
+RECT ButtonRect = { 100,topCoordMessages+60,100,20 };
 int ID_SendButton = IDC_MAINFRM_BTN_1;
-
 //********************WSA_NON_BLOKING initialization **************************************
 WSA_non_blocking_Client WSAnb_Client;
 
-wchar_t IPString[] = L"127.0.0.1";
-int portNumber = 27015;
+wchar_t IPString[20] = L"127.0.0.1";
+ int portNumber = 27015;
 // ******************* FUNCTION DECLARATIONS **********************************************
 ATOM                MyRegisterClass();
 HWND                InitInstance( int);
@@ -111,67 +115,95 @@ int Ini_WSA_non_blocking_client(HWND hwnd) {
 /// </summary>
 /// <param name="hwnd">main Window Handle</param>
 void Ini_UI(HWND hwnd) {
-    hwndStatic = CreateWindowEx(
-        0, L"STATIC",   // predefined class 
-        L"Recieve:",         // no window title 
-        WS_CHILD  |WS_VISIBLE| ES_LEFT,
-        StaticRect1.left,         // x position 
-        StaticRect1.top,         // y position 
-        StaticRect1.right,        // Button width
-        StaticRect1.bottom,        // Button height
-        hwnd,         // parent window 
-        NULL,           // No menu. 
+    //*******************************IP COMBO BOX + PORT EDIT*************************
+    hwndIP = CreateWindowEx(
+        0, L"COMBOBOX",         // predefined class 
+        L"Recieve:",            // no window title 
+        CBS_DROPDOWN | CBS_HASSTRINGS | WS_CHILD | WS_OVERLAPPED | WS_VISIBLE,
+        ComboIPRect1.left,      // x position 
+        ComboIPRect1.top,       // y position 
+        ComboIPRect1.right,     // Combo width
+        ComboIPRect1.bottom,    // Combo height
+        hwnd,                   // parent window 
+        NULL,                   // No menu. 
         hInst,
-        NULL);        // pointer not needed 
+        NULL);                  // pointer not needed 
+
+    hwndPort = CreateWindowEx(
+        0, L"EDIT",             // predefined class 
+        NULL,                   // no window title 
+        WS_CHILD | WS_BORDER |WS_VISIBLE | ES_LEFT,
+        EditPortRect1.left,
+        EditPortRect1.top, 
+        EditPortRect1.right, 
+        EditPortRect1.bottom,   // set size in WM_SIZE message 
+        hwnd,                   // parent window 
+        NULL,                   // No menu. 
+        hInst,
+        NULL);                  // pointer not needed 
+    /********************************************************************************/
+
+    hwndStatic = CreateWindowEx(
+        0, L"STATIC",           // predefined class 
+        L"Recieve:",            // no window title 
+        WS_CHILD | WS_VISIBLE | ES_LEFT,
+        StaticRect1.left,       // x position 
+        StaticRect1.top,        // y position 
+        StaticRect1.right,      // Button width
+        StaticRect1.bottom,     // Button height
+        hwnd,                   // parent window 
+        NULL,                   // No menu. 
+        hInst,
+        NULL);                  // pointer not needed 
 
     hwndMesageRec = CreateWindowEx(
-        0, L"STATIC",   // predefined class 
-        L"No Message",         // no window title 
+        0, L"STATIC",           // predefined class 
+        L"No Message",          // no window title 
         WS_CHILD  | WS_BORDER | ES_LEFT,
-        StaticRect2.left,         // x position 
-        StaticRect2.top,         // y position 
-        StaticRect2.right,        // Button width
-        StaticRect2.bottom,        // Button height
-        hwnd,         // parent window 
-        NULL,           // No menu. 
+        StaticRect2.left,       // x position 
+        StaticRect2.top,        // y position 
+        StaticRect2.right,      // Button width
+        StaticRect2.bottom,     // Button height
+        hwnd,                   // parent window 
+        NULL,                   // No menu. 
         hInst,
-        NULL);        // pointer not needed 
+        NULL);                  // pointer not needed 
 
     hwndStatic2 = CreateWindowEx(
-        0, L"STATIC",   // predefined class 
-        L"Send:",         // no window title 
+        0, L"STATIC",           // predefined class 
+        L"Send:",               // no window title 
         WS_CHILD  | ES_LEFT,
-        StaticRect3.left,         // x position 
-        StaticRect3.top,         // y position 
-        StaticRect3.right,        // Button width
-        StaticRect3.bottom,        // Button height
-        hwnd,         // parent window 
-        NULL,           // No menu. 
+        StaticRect3.left,       // x position 
+        StaticRect3.top,        // y position 
+        StaticRect3.right,      // Button width
+        StaticRect3.bottom,     // Button height
+        hwnd,                   // parent window 
+        NULL,                   // No menu. 
         hInst,
-        NULL);        // pointer not needed 
+        NULL);                  // pointer not needed 
 
     hwndButton = CreateWindow(
-        L"BUTTON",  // Predefined class; Unicode assumed 
-        L"SEND",      // Button text 
+        L"BUTTON",              // Predefined class; Unicode assumed 
+        L"SEND",                // Button text 
         WS_TABSTOP  | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles 
-        ButtonRect.left,         // x position 
+        ButtonRect.left,        // x position 
         ButtonRect.top,         // y position 
-        ButtonRect.right,        // Button width
-        ButtonRect.bottom,        // Button height
-        hwnd,     // Parent window
-        (HMENU)IDC_MAINFRM_BTN_1,       // For buttons, hMenu is used to send the WM_BUTTON identifier
+        ButtonRect.right,       // Button width
+        ButtonRect.bottom,      // Button height
+        hwnd,                   // Parent window
+        (HMENU)IDC_MAINFRM_BTN_1,// For buttons, hMenu is used to send the WM_BUTTON identifier
         hInst,
-        NULL);      // Pointer to identify the button in WndProc()
+        NULL);                  // Pointer to identify the button in WndProc()
 
     hwndEdit = CreateWindowEx(
-        0, L"EDIT",   // predefined class 
-        NULL,         // no window title 
+        0, L"EDIT",             // predefined class 
+        NULL,                   // no window title 
         WS_CHILD |WS_BORDER| ES_LEFT ,
-        0, 0, 0, 0,   // set size in WM_SIZE message 
-        hwnd,         // parent window 
-        NULL,           // No menu. 
+        0, 0, 0, 0,             // set size in WM_SIZE message 
+        hwnd,                   // parent window 
+        NULL,                   // No menu. 
         hInst,
-        NULL);        // pointer not needed 
+        NULL);                  // pointer not needed 
 
 }
 
@@ -221,12 +253,19 @@ HWND InitInstance( int nCmdShow)
 
    return hWnd;
 }
-
 /// <summary>
 /// Main window procedure
 /// </summary>
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    //Obtener el IP de la ordeñadora
+    LPSOCKADDR sockaddr_ip;
+    ADDRINFOW* ptr = NULL;
+    INT iRetval;
+    wchar_t ipstringbuffer[46];
+    DWORD ipbufferlength = 46;
+    TCHAR  ListItem[256];
+
     switch (message)
     {
     case WM_TIMER:
@@ -238,7 +277,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             switch (WSAnb_Client.state)
             {
             case WSA_non_blocking_Client::STATE::NONE:
-                //wchar_t IPString[] = L"192.168.137.1";
                 WSAnb_Client.Attemp_connect(IPString, portNumber);
                 break;
             case WSA_non_blocking_Client::STATE::CONNECTED:
@@ -247,7 +285,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             default:
                 break;
             }
-             WSAnb_Client.testForEvents(); 
+            WSAnb_Client.testForEvents();
 
             InvalidateRect(hWnd, NULL, TRUE);
             return 0;
@@ -255,84 +293,145 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             return DefWindowProc(hWnd, message, wParam, lParam);
         }
     }
-    case WM_CREATE :
+    case WM_CREATE:
     {
         Ini_UI(hWnd);
-        // Add text to the window. 
-        wchar_t text[] = L"Text for EditBox";
+        // Add text to the Message editBox
+        wchar_t text[] = L"Message to send it to the server.";
         SendMessage(hwndEdit, WM_SETTEXT, 0, (LPARAM)text);
+        // Add the Port Number to editBox
+        wchar_t text2[10];
+        _itow_s(portNumber, text2, 10);
+        SendMessage(hwndPort, WM_SETTEXT, 0, (LPARAM)text2);
+
+        // Add string to combobox.
+        //First add the default localhost IP
+        SendMessage(hwndIP, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)IPString);
+        //Then. list the avaliable IP's on device
+        ADDRINFOW* addrResult;
+        WSAnb_Client.GetIPList(&addrResult);
+        // Retrieve each address and print out the hex bytes
+        for (ptr = addrResult; ptr != NULL; ptr = ptr->ai_next)
+        {
+            switch (ptr->ai_family) {
+            case AF_UNSPEC:
+                break;
+            case AF_INET:
+            {
+                sockaddr_ip = (LPSOCKADDR)ptr->ai_addr;
+                // The buffer length is changed by each call to WSAAddresstoString
+                // So we need to set it for each iteration through the loop for safety
+                ipbufferlength = 46;
+                iRetval = WSAAddressToStringW(sockaddr_ip, (DWORD)ptr->ai_addrlen, NULL,
+                    ipstringbuffer, &ipbufferlength);
+                if (iRetval)
+                    XTrace(L"WSAAddressToString failed with ", WSAGetLastError());
+                else
+                {
+                    SendMessage(hwndIP, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)ipstringbuffer);
+                    // Send the CB_SETCURSEL message to display an initial item 
+                    //  in the selection field  
+                    SendMessage(hwndIP, CB_SETCURSEL, (WPARAM)0, (LPARAM)0);
+                }
+                break;
+            }
+            }
+        }
         return 0;
     }
     case WM_COMMAND:
-        {
-        if (lParam== (LPARAM)hwndButton)
+    {
+        if (lParam == (LPARAM)hwndButton)
         {
             const int textSize = 1000;
             char text[textSize];
-            if(GetWindowTextA(hwndEdit, text, textSize)!=0)
-                WSAnb_Client.SendText(text,strlen(text));
+            if (GetWindowTextA(hwndEdit, text, textSize) != 0)
+                WSAnb_Client.SendText(text, strlen(text));
             return 0;
         }
-            int wmId = LOWORD(wParam);
-            // Analizar las selecciones de menú:
-            switch (wmId)
-            {
-            case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-                return 0;
-            case IDM_EXIT:
-                DestroyWindow(hWnd);
-                return 0;
-            default:
-                return DefWindowProc(hWnd, message, wParam, lParam);
+        if (lParam == (LPARAM)hwndIP) {
+            if (HIWORD(wParam) == CBN_SELCHANGE) {
+                int ItemIndex = SendMessage((HWND)lParam, (UINT)CB_GETCURSEL,
+                    (WPARAM)0, (LPARAM)0);
+                (TCHAR)SendMessage((HWND)lParam, (UINT)CB_GETLBTEXT,
+                    (WPARAM)ItemIndex, (LPARAM)IPString);
             }
         }
-        break;
+        if (lParam == (LPARAM)hwndPort) {
+            if (HIWORD(wParam) == EN_CHANGE) {
+                const int textSize = 1000;
+                wchar_t text[textSize];
+                if (GetWindowText(hwndPort, text, textSize) != 0)
+                {
+                    //If the number is correct, we use it.
+                    //If not, the older is used
+                    unsigned int number = _wtoi(text);
+                    if ((number < 65535) && (number > 0)) {
+                        portNumber = number;
+                    }
+                }
+            }
+        }
+        int wmId = LOWORD(wParam);
+        // Analizar las selecciones de menú:
+        switch (wmId)
+        {
+        case IDM_ABOUT:
+            DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+            return 0;
+        case IDM_EXIT:
+            DestroyWindow(hWnd);
+            return 0;
+        default:
+            return DefWindowProc(hWnd, message, wParam, lParam);
+        }
+    }
+    break;
     case WM_SETFOCUS:
         SetFocus(hwndEdit);
         return 0;
     case WM_PAINT:
+    {
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(hWnd, &ps);
+        // TODO: Agregar cualquier código de dibujo que use hDC aquí...
+        RECT TextRect = { 10,10,300,100 };
+        switch (WSAnb_Client.state)
         {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: Agregar cualquier código de dibujo que use hDC aquí...
-            RECT TextRect = { 10,10,300,100 };
-            switch (WSAnb_Client.state)
-            {
-            case WSA_non_blocking_Client::STATE::NONE:
-                DrawText(hdc, L"Estado:None", -1, &TextRect, DT_VCENTER | DT_LEFT);
-                ShowMessageControls(FALSE);
-                break;
-            case WSA_non_blocking_Client::STATE::CONNECTED:
-                DrawText(hdc, L"Estado:Conectado", -1, &TextRect, DT_VCENTER | DT_LEFT);
-                UpdateUI(hdc, &TextRect);
-                ShowMessageControls(TRUE);
-                break;
-            case WSA_non_blocking_Client::STATE::REQUESTING:
-                DrawText(hdc, L"Estado:Solicitando conexion", -1, &TextRect, DT_VCENTER | DT_LEFT);
-                UpdateUI(hdc, &TextRect);
-                ShowMessageControls(FALSE);
-                break;
-            default:
-                DrawText(hdc, L"Estado:Desconocido", -1, &TextRect, DT_VCENTER | DT_LEFT);
-                ShowMessageControls(FALSE);
-                break;
-            }
-            EndPaint(hWnd, &ps);
+        case WSA_non_blocking_Client::STATE::NONE:
+            DrawText(hdc, L"Estado:None", -1, &TextRect, DT_VCENTER | DT_LEFT);
+            ShowMessageControls(FALSE);
+            break;
+        case WSA_non_blocking_Client::STATE::CONNECTED:
+            DrawText(hdc, L"Estado:Conectado", -1, &TextRect, DT_VCENTER | DT_LEFT);
+            UpdateUI(hdc, &TextRect);
+            ShowMessageControls(TRUE);
+            break;
+        case WSA_non_blocking_Client::STATE::REQUESTING:
+            DrawText(hdc, L"Estado:Solicitando conexion", -1, &TextRect, DT_VCENTER | DT_LEFT);
+            UpdateUI(hdc, &TextRect);
+            ShowMessageControls(FALSE);
+            break;
+        default:
+            DrawText(hdc, L"Estado:Desconocido", -1, &TextRect, DT_VCENTER | DT_LEFT);
+            ShowMessageControls(FALSE);
+            break;
         }
-        break; 
+        EndPaint(hWnd, &ps);
+    }
+    break;
     case WM_SIZE:
     {
         // Make the edit control the size of the window's client area. 
         MoveWindow(hwndMesageRec,
             StaticRect2.left, StaticRect2.top,                    // starting x- and y-coordinates 
-            LOWORD(lParam)- StaticRect2.left-20,                // width of client area 
+            LOWORD(lParam) - StaticRect2.left - 20,                // width of client area 
             20,                // height of client area 
             TRUE);                 // repaint window 
 
         MoveWindow(hwndEdit,
             EditRect.left, EditRect.top,                    // starting x- and y-coordinates 
-            LOWORD(lParam)-EditRect.left-20,                // width of client area 
+            LOWORD(lParam) - EditRect.left - 20,                // width of client area 
             20,                // height of client area 
             TRUE);                 // repaint window 
         return 0;
