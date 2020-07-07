@@ -137,7 +137,11 @@ public: int CreateClientSocket() {
 /// WSAEWOULDBLOCK indica que se ha cancelado el intento de conexion para no bloquear </returns>
 public: BOOL Attemp_connect(wchar_t* IPString, int port) {
     lastWSAError = 0;
-    if (bConnected)return TRUE;
+    if (bConnected)
+    {
+        closesocket(ClientSocket);
+        if (!CreateClientSocket())return false;
+    }
     IN_ADDR in_addr = { 0 };
     //Guarda el string IP u el Puerto recibidos
     //actualiza el estado de la clase

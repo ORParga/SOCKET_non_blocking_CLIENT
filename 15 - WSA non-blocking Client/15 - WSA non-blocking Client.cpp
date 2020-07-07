@@ -23,9 +23,10 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // Window name
 
 //*********************COMMON CONTROLS ***************************************************
 HWND hwndButton, hwndEdit, hwndStatic, hwndStatic2, hwndMesageRec;
-HWND hwndIP, hwndPort;
+HWND hwndIP, hwndPort, hwndButtonReconnect;
 RECT ComboIPRect1 = { 10,70,150,200 };
 RECT EditPortRect1 = { ComboIPRect1.left + ComboIPRect1.right + 10,70,100,20 };
+RECT ButtonReconect = { EditPortRect1.left ,30,80,30 };
 int topCoordMessages = 100;
 RECT StaticRect1 = { 10,topCoordMessages,80,20 };
 RECT StaticRect2 = { 100,topCoordMessages,100,20 };
@@ -115,7 +116,7 @@ int Ini_WSA_non_blocking_client(HWND hwnd) {
 /// </summary>
 /// <param name="hwnd">main Window Handle</param>
 void Ini_UI(HWND hwnd) {
-    //*******************************IP COMBO BOX + PORT EDIT*************************
+    //*******************************IP COMBO BOX + PORT EDIT + REconnect Button***********
     hwndIP = CreateWindowEx(
         0, L"COMBOBOX",         // predefined class 
         L"Recieve:",            // no window title 
@@ -141,6 +142,20 @@ void Ini_UI(HWND hwnd) {
         NULL,                   // No menu. 
         hInst,
         NULL);                  // pointer not needed 
+
+    hwndButtonReconnect = CreateWindow(
+        L"BUTTON",              // Predefined class; Unicode assumed 
+        L"Reconnect",                // Button text 
+        WS_TABSTOP | WS_CHILD |WS_VISIBLE| BS_DEFPUSHBUTTON,  // Styles 
+        ButtonReconect.left,        // x position 
+        ButtonReconect.top,         // y position 
+        ButtonReconect.right,       // Button width
+        ButtonReconect.bottom,      // Button height
+        hwnd,                   // Parent window
+        (HMENU)IDC_MAINFRM_BTN_1,// For buttons, hMenu is used to send the WM_BUTTON identifier
+        hInst,
+        NULL);                  // Pointer to identify the button in WndProc()
+
     /********************************************************************************/
 
     hwndStatic = CreateWindowEx(
@@ -349,12 +364,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 WSAnb_Client.SendText(text, strlen(text));
             return 0;
         }
+        if (lParam == (LPARAM)hwndButtonReconnect)
+        {
+            //Get IP 
+                int ItemIndex = SendMessage(hwndIP, (UINT)CB_GETCURSEL,
+                    (WPARAM)0, (LPARAM)0);
+                (TCHAR)SendMessage(hwndIP, (UINT)CB_GETLBTEXT,
+                    (WPARAM)ItemIndex, (LPARAM)IPString);
+            //Get Port
+                const int textSize = 1000;
+                wchar_t text[textSize];
+                if (GetWindowText(hwndPort, text, textSize) != 0)
+                {
+                    //If the number is correct, we use it.
+                    //If not, the older is used
+                    unsigned int number = _wtoi(text);
+                    if ((number < 65535) && (number > 0)) {
+                        portNumber = number;
+                    }
+                }
+                WSAnb_Client.Attemp_connect(IPString, portNumber);
+        }
         if (lParam == (LPARAM)hwndIP) {
             if (HIWORD(wParam) == CBN_SELCHANGE) {
-                int ItemIndex = SendMessage((HWND)lParam, (UINT)CB_GETCURSEL,
-                    (WPARAM)0, (LPARAM)0);
-                (TCHAR)SendMessage((HWND)lParam, (UINT)CB_GETLBTEXT,
-                    (WPARAM)ItemIndex, (LPARAM)IPString);
             }
         }
         if (lParam == (LPARAM)hwndPort) {

@@ -1,11 +1,11 @@
 ﻿  15 - WSA non-blocking Client.cpp
-E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\15 - WSA non-blocking Client.h(326,27): warning C4101: 'comodin2': variable local sin referencia
-E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\15 - WSA non-blocking Client.h(326,13): warning C4101: 'comodin': variable local sin referencia
-E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\15 - WSA non-blocking Client.cpp(354,31): warning C4244: 'inicializando': conversión de 'LRESULT' a 'int'; posible pérdida de datos
-E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\15 - WSA non-blocking Client.cpp(267,12): warning C4101: 'ListItem': variable local sin referencia
+E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\15 - WSA non-blocking Client.h(330,27): warning C4101: 'comodin2': variable local sin referencia
+E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\15 - WSA non-blocking Client.h(330,13): warning C4101: 'comodin': variable local sin referencia
+E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\15 - WSA non-blocking Client.cpp(370,31): warning C4244: 'inicializando': conversión de 'LRESULT' a 'int'; posible pérdida de datos
+E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\15 - WSA non-blocking Client.cpp(282,12): warning C4101: 'ListItem': variable local sin referencia
   Generando código
-  Previous IPDB not found, fall back to full compilation.
-E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\15 - WSA non-blocking Client.h(407): warning C4715: 'WSA_non_blocking_Client::GetIPList': no todas las rutas de acceso de control devuelven un valor
-  All 33 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  3 of 34 functions ( 8.8%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
   Generación de código finalizada
   15 - WSA non-blocking Client.vcxproj -> E:\PROGRAMACION\C++\Comunications\15 - WSA non-blocking Client\15 - WSA non-blocking Client\x64\Release\15 - WSA non-blocking Client.exe
