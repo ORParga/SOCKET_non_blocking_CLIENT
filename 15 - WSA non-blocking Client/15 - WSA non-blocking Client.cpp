@@ -20,6 +20,7 @@
 HINSTANCE hInst;                                // Current Instance
 WCHAR szTitle[MAX_LOADSTRING];                  // App Tittle
 WCHAR szWindowClass[MAX_LOADSTRING];            // Window name
+//*********************** VARIOS ^*******************************************************
 
 //*********************COMMON CONTROLS ***************************************************
 HWND hwndButton, hwndEdit, hwndStatic, hwndStatic2, hwndMesageRec;
@@ -47,6 +48,7 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 int Ini_WSA_non_blocking_client(HWND);
 void XTrace(LPCTSTR , ...);
 void XTrace0(LPCTSTR );
+wchar_t* MessageFormated(wchar_t* bufferReturned, LPCTSTR lpszFormat, ...);
 void UpdateUI(HDC , RECT* );
 void Ini_UI(HWND);
 void ShowMessageControls(BOOL );
@@ -72,9 +74,29 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // Realizar la inicialización de la aplicación:
     HWND hwnd = InitInstance ( nCmdShow);
-    if (!hwnd) return FALSE;
+    if (!hwnd) {
+        MessageBox(NULL,
+            L"CreateWindowW() or UpdateWindow() has returned error.\rUnknow reasson.",
+            L"ERROR. Main Window can not be created.",
+            MB_OK | MB_ICONERROR);
+        return FALSE;
+    }
 
-    if (!Ini_WSA_non_blocking_client(hwnd))return FALSE;
+    if (!Ini_WSA_non_blocking_client(hwnd))
+    {
+
+        TCHAR szMessageFormatedBuffer[512];
+        wchar_t ErrorMessage1[] = L"";
+        MessageFormated(szMessageFormatedBuffer,
+            L"Error al inicializar el socket cliente.\rCodigo de error:%u = %s",
+            WSAnb_Client.lastWSAError,
+            WSAnb_Client.WindowsErrorToString(WSAnb_Client.lastWSAError));
+        MessageBox(NULL,
+            szMessageFormatedBuffer,
+            L"ERROR\n",
+            MB_OK | MB_ICONERROR);
+        return FALSE;
+    }
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY15WSANONBLOCKINGCLIENT));
 
     MSG msg;
@@ -91,7 +113,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     return (int) msg.wParam;
 }
-
 /// <summary>
 /// Initialize Client Socket
 /// Initialize TIMER
@@ -548,4 +569,22 @@ void XTrace(LPCTSTR lpszFormat, ...)
     nBuf = _vstprintf_s(szBuffer, 511, lpszFormat, args);
     ::OutputDebugString(szBuffer);
     va_end(args);
+}
+
+/// <summary>
+/// printf() style messaging
+/// https://stackoverflow.com/questions/15240/
+/// </summary>
+/// <param name="bufferReturned">pointer to a 512 WORDs array </param>
+/// <param name="lpszFormat">-Debugging text</param>
+/// <param name="">.... parameters in _vstprintf_s() style</param>
+wchar_t* MessageFormated(wchar_t* bufferReturned, LPCTSTR lpszFormat, ...)
+{
+    va_list args;
+    va_start(args, lpszFormat);
+    int nBuf;
+    nBuf = _vstprintf_s(bufferReturned, 511, lpszFormat, args);
+    //::OutputDebugString(szBuffer);
+    va_end(args);
+    return bufferReturned;
 }

@@ -10,7 +10,7 @@
 #define DATA_BUFSIZE 512
 class WSA_non_blocking_Client {
     //*************** STATUS **********************************************************
-public: enum class STATE { NONE, CONNECTED, LISTENING, REQUESTING };
+public: enum class STATE { NONE, CONNECTED, LISTENING, REQUESTING, ERROR_DETECTED};
 public:STATE            state = STATE::NONE;
 public:BOOL             bConnected = FALSE;
 //*************** SOCKET *********************************************************
@@ -93,6 +93,7 @@ public: int CreateClientSocket() {
     if (iResult != 0) {
         lastWSAError = WSAGetLastError();
         XTrace(L"WSAStartup failed, returned= %d. lastWSAError=%u\n", iResult, lastWSAError);
+        state = STATE::ERROR_DETECTED;
         return FALSE;
     }
     // Create socket****************************************************************
@@ -101,6 +102,7 @@ public: int CreateClientSocket() {
     {
         lastWSAError = WSAGetLastError();
         XTrace(L"socket function failed with error = %d\n",lastWSAError );
+        state = STATE::ERROR_DETECTED;
         return FALSE;
     }
     // Associate event types  FD_READ|FD_WRITE| FD_CONNECT |FD_CLOSE*****************************************
@@ -113,28 +115,35 @@ public: int CreateClientSocket() {
         XTrace(L"WSAEventSelect failed with error %u: %s\n", lastWSAError, WindowsErrorToString(lastWSAError));
         closesocket(ClientSocket);
         WSACleanup();
+        state = STATE::ERROR_DETECTED;
         return FALSE;
     }
     return TRUE;
 }
 /// <summary>
-/// Inicia una conexion con el SERVIDOR en la IP y puertos especificados.
-/// Si no consigue conectar, pero la orden de conectar se ejecuta satisfactoriamente,
-/// coloca el STATUS en "REQUESTING" y WSA_non_blocking_Client entra en espera 
-/// del disparo de un evento "FD_CONNECT". El metodo regresa inmediatamente ,
-/// NO bloquea la aplicacion, pero la aplicacion debe
-/// llamar a WSAnb_Client.Attemp_connect() para volver a intentarlo y a 
-/// WSAnb_Client.testForEvents() regularmente ( con un WM_TIMER, por ejemplo)
-/// para reaccionar al evento FD_CONNECT que se producirá cuando el Servidor acepte la 
-/// conexion solicitada.
-/// Attemp_connect() modifica STATUS- CONNECTED si se ha conectado a la primera o NONE
-/// si se ha rechazado por tiempo para no bloquear la aplicacion
+/// Initiates a connection to the SERVER on the specified IP and ports.
+/// If it fails to connect, but the connect command runs successfully,
+/// put STATUS in "REQUESTING" and WSA_non_blocking_Client goes on hold
+/// of the triggering of an event "FD_CONNECT". The method returns immediately,
+/// DOES NOT block the application, but the application must
+/// call WSAnb_Client.Attemp_connect () to try again and
+/// WSAnb_Client.testForEvents () regularly (with a WM_TIMER, for example)
+/// to react to the FD_CONNECT event that will occur when the Server accepts the
+/// connection requested.
+/// Attemp_connect () modifies STATUS- CONNECTED if it has connected to the first one or NONE
+/// if it has been rejected by time to not block the application
 /// </summary>
-/// <param name="IPString">IP v4 del servidor al que se quiere conectar</param>
-/// <param name="port">Puerto de la IP al que se quiere conectar</param>
-/// <returns>TRUE si se ha conectado o si se ha rechazado para no bloquear. FALSE si algo a fallado. 
-/// lastWSAError guarda el último valor de WSAGetLastError. entre los posibles valores de lastWSAError,
-/// WSAEWOULDBLOCK indica que se ha cancelado el intento de conexion para no bloquear </returns>
+/// <param name="IPString">IP v4 of the server to which you want to connect</param>
+/// <param name="port">Port of the IP to which you want to connect</param>
+/// <returns>TRUE if connected or rejected to not block. FALSE if something has failed.
+/// lastWSAError saves the last value of WSAGetLastError. between the possible values of lastWSAError,
+/// WSAEWOULDBLOCK indicates that the connection attempt to not block has been canceled
+/// This function alters the content of "state" variable. 
+/// state=CONNECTED. Connection has been made with a server.
+/// sate=LISTENING. The connection has not been made, probably because the server is not available.
+/// Try again in a little while.
+/// state=ERROR_DETECTED The requested IP or port is not in the valid format. O connect () has returned another error
+///</returns>
 public: BOOL Attemp_connect(wchar_t* IPString, int port) {
     lastWSAError = 0;
     if (bConnected)
@@ -148,11 +157,20 @@ public: BOOL Attemp_connect(wchar_t* IPString, int port) {
     wcscpy_s(this->IPString, this->IPString_Lenght, IPString);
     _itow_s(port, this->PortString, 10);
     if (InetPton(AF_INET, IPString, &in_addr) != 1) {
+        //The InetPton function returns a value of 0 if the pAddrBuf parameter points to a string
+        //that is not a valid IPv4 dotted - decimal string or a valid IPv6 address string.
+        //Otherwise, a value of - 1 is returned, and a specific error code can be retrieved by 
+        //calling the WSAGetLastError() for extended error information.
+        if (iResult == 0) {
+            //WSAEFAULT=The system detected an invalid pointer address.
+            lastWSAError = WSAEFAULT;
+            XTrace(L"InetPton failed: IPString is not a valid IP");
+            state = STATE::ERROR_DETECTED;
+            return FALSE;
+        }
         lastWSAError = WSAGetLastError();
         XTrace(L"InetPton error %u\n", lastWSAError);
-        closesocket(ClientSocket);
-        WSACloseEvent(EventArray[0]);
-        WSACleanup();
+            state = STATE::ERROR_DETECTED;
         return FALSE;
 
     }
@@ -171,9 +189,9 @@ public: BOOL Attemp_connect(wchar_t* IPString, int port) {
             state = STATE::REQUESTING;
             return TRUE;
         default:
-            break;
+            state = STATE::ERROR_DETECTED;
+            return FALSE;
         }
-        return FALSE;
     }
     bConnected = TRUE;
     state = STATE::CONNECTED;
